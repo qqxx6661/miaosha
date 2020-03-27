@@ -27,4 +27,6 @@ public interface OrderService {
      * @throws Exception
      */
     public int createPessimisticOrder(int sid);
+
+    public int createVerifiedOrder(Integer sid, Integer userId, String verifyHash) throws Exception;
 }
