@@ -51,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
         //乐观锁更新库存
         saleStockOptimistic(stock);
         //创建订单
-        int id = createOrder(stock);
+        createOrder(stock);
         return stock.getCount() - (stock.getSale()+1);
     }
 
@@ -63,7 +63,7 @@ public class OrderServiceImpl implements OrderService {
         //更新库存
         saleStock(stock);
         //创建订单
-        int id = createOrder(stock);
+        createOrder(stock);
         return stock.getCount() - (stock.getSale());
     }
 

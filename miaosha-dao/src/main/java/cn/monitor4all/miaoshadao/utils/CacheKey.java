@@ -1,8 +1,11 @@
 package cn.monitor4all.miaoshadao.utils;
 
 public enum CacheKey {
-    HASH_KEY("miaosha_hash"),
-    LIMIT_KEY("miaosha_limit");
+
+    HASH_KEY("miaosha_v1_hash"),
+    LIMIT_KEY("miaosha_v1_limit"),
+    
+    STOCK_COUNT("miaosha_v1_stock_count");
 
     private String key;
 

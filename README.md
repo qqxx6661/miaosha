@@ -10,6 +10,9 @@
 
 [【秒杀系统】零基础上手秒杀系统（三）：抢购接口隐藏 + 单用户限制频率](https://mp.weixin.qq.com/s?__biz=MzU1NTA0NTEwMg==&mid=2247484184&idx=1&sn=8b878e9e730a6e4da27ed336c8201c92&lang=zh_CN#rd)
 
+[【秒杀系统】零基础上手秒杀系统（四）：缓存与数据库双写问题的争议](https://mp.weixin.qq.com/s?__biz=MzU1NTA0NTEwMg==&mid=2247484200&idx=1&sn=6b6c7251ee83fe8ef9201373aafcffdd&chksm=fbdb1aa9ccac93bfe26655f89056b0d25b3a536f6b11148878fe96ffdf1d8349d44659cad784&token=841068032&lang=zh_CN#rd)
+
+
 ### 项目使用简介
 
 项目是SpringBoot工程，并且是父子工程，直接导入IDEA，Eclipse即可使用。

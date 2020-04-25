@@ -71,7 +71,7 @@
       </if>
     </trim>
   </insert>
-  <update id="cupdateByPrimaryKeySelective" parameterType="cn.monitor4all.miaoshadao.dao.Stock" >
+  <update id="updateByPrimaryKeySelective" parameterType="cn.monitor4all.miaoshadao.dao.Stock" >
     update stock
     <set >
       <if test="name != null" >
