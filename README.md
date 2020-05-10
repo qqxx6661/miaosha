@@ -12,6 +12,7 @@
 
 [【秒杀系统】零基础上手秒杀系统（四）：缓存与数据库双写问题的争议](https://mp.weixin.qq.com/s?__biz=MzU1NTA0NTEwMg==&mid=2247484200&idx=1&sn=6b6c7251ee83fe8ef9201373aafcffdd&chksm=fbdb1aa9ccac93bfe26655f89056b0d25b3a536f6b11148878fe96ffdf1d8349d44659cad784&token=841068032&lang=zh_CN#rd)
 
+[【秒杀系统】番外篇 | 阿里开源MySQL中间件Canal快速入门](https://mp.weixin.qq.com/s?__biz=MzU1NTA0NTEwMg==&mid=2247484273&idx=1&sn=7fec41a40e763df094c0dd675330808a&chksm=fbdb1af0ccac93e676c2a0c6aeb1ff3edfe43b30969a7c1bbe19ccf7270acd6e41e6812caf0d&lang=zh_CN#rd)
 
 ### 项目使用简介
 
@@ -28,5 +29,5 @@
 
 ## About me
 
-![公众号：后端技术漫谈.jpg](http://ww1.sinaimg.cn/large/8de6a3d3gy1g8xtwmv7bzj20hq079t92.jpg)
+![个人公众号：后端技术漫谈](http://ww1.sinaimg.cn/large/8de6a3d3gy1genhmip8aqg20go0gojz5.gif)
 
