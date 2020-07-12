@@ -9,12 +9,14 @@ import cn.monitor4all.miaoshadao.utils.CacheKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
+import java.util.Collections;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -101,10 +103,51 @@ public class OrderServiceImpl implements OrderService {
         LOGGER.info("乐观锁更新库存成功");
 
         //创建订单
-        createOrderWithUserInfo(stock, userId);
+        createOrderWithUserInfoInDB(stock, userId);
         LOGGER.info("创建订单成功");
 
         return stock.getCount() - (stock.getSale()+1);
+    }
+
+    @Override
+    public void createOrderByMq(Integer sid, Integer userId) throws Exception {
+
+        // 模拟多个用户同时抢购，导致消息队列排队等候10秒
+        Thread.sleep(10000);
+
+        Stock stock;
+        //校验库存（不要学我在trycatch中做逻辑处理，这样是不优雅的。这里这样处理是为了兼容之前的秒杀系统文章）
+        try {
+            stock = checkStock(sid);
+        } catch (Exception e) {
+            LOGGER.info("库存不足！");
+            return;
+        }
+        //乐观锁更新库存
+        boolean updateStock = saleStockOptimistic(stock);
+        if (!updateStock) {
+            LOGGER.warn("扣减库存失败，库存已经为0");
+            return;
+        }
+
+        LOGGER.info("扣减库存成功，剩余库存：[{}]", stock.getCount() - stock.getSale() - 1);
+        stockService.delStockCountCache(sid);
+        LOGGER.info("删除库存缓存");
+
+        //创建订单
+        LOGGER.info("写入订单至数据库");
+        createOrderWithUserInfoInDB(stock, userId);
+        LOGGER.info("写入订单至缓存供查询");
+        createOrderWithUserInfoInCache(stock, userId);
+        LOGGER.info("下单完成");
+
+    }
+
+    @Override
+    public Boolean checkUserOrderInfoInCache(Integer sid, Integer userId) throws Exception {
+        String key = CacheKey.USER_HAS_ORDER.getKey() + "_" + sid;
+        LOGGER.info("检查用户Id：[{}] 是否抢购过商品Id：[{}] 检查Key：[{}]", userId, sid, key);
+        return stringRedisTemplate.opsForSet().isMember(key, userId.toString());
     }
 
     /**
@@ -146,12 +189,10 @@ public class OrderServiceImpl implements OrderService {
      * 更新库存 乐观锁
      * @param stock
      */
-    private void saleStockOptimistic(Stock stock) {
+    private boolean saleStockOptimistic(Stock stock) {
         LOGGER.info("查询数据库，尝试更新库存");
         int count = stockService.updateStockByOptimistic(stock);
-        if (count == 0){
-            throw new RuntimeException("乐观锁并发更新库存失败") ;
-        }
+        return count != 0;
     }
 
     /**
@@ -163,20 +204,30 @@ public class OrderServiceImpl implements OrderService {
         StockOrder order = new StockOrder();
         order.setSid(stock.getId());
         order.setName(stock.getName());
-        int id = orderMapper.insertSelective(order);
-        return id;
+        return orderMapper.insertSelective(order);
     }
 
     /**
-     * 创建订单：保存用户信息
+     * 创建订单：保存用户订单信息到数据库
      * @param stock
      * @return
      */
-    private int createOrderWithUserInfo(Stock stock, Integer userId) {
+    private int createOrderWithUserInfoInDB(Stock stock, Integer userId) {
         StockOrder order = new StockOrder();
         order.setSid(stock.getId());
         order.setName(stock.getName());
         order.setUserId(userId);
         return orderMapper.insertSelective(order);
+    }
+
+    /**
+     * 创建订单：保存用户订单信息到缓存
+     * @param stock
+     * @return 返回添加的个数
+     */
+    private Long createOrderWithUserInfoInCache(Stock stock, Integer userId) {
+        String key = CacheKey.USER_HAS_ORDER.getKey() + "_" + stock.getId().toString();
+        LOGGER.info("写入用户订单数据Set：[{}] [{}]", key, userId.toString());
+        return stringRedisTemplate.opsForSet().add(key, userId.toString());
     }
 }

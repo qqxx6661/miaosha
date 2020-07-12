@@ -23,9 +23,22 @@ public class StockServiceImpl implements StockService {
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
+    public Integer getStockCount(int sid) {
+        Integer stockLeft;
+        stockLeft = getStockCountByCache(sid);
+        LOGGER.info("缓存中取得库存数：[{}]", stockLeft);
+        if (stockLeft == null) {
+            stockLeft = getStockCountByDB(sid);
+            LOGGER.info("缓存未命中，查询数据库，并写入缓存");
+            setStockCountCache(sid, stockLeft);
+        }
+        return stockLeft;
+    }
+
+    @Override
     public int getStockCountByDB(int id) {
         Stock stock = stockMapper.selectByPrimaryKey(id);
-        return stock.getCount();
+        return stock.getCount() - stock.getSale();
     }
 
     @Override
@@ -43,6 +56,7 @@ public class StockServiceImpl implements StockService {
     public void setStockCountCache(int id, int count) {
         String hashKey = CacheKey.STOCK_COUNT.getKey() + "_" + id;
         String countStr = String.valueOf(count);
+        LOGGER.info("写入商品库存缓存: [{}] [{}]", hashKey, countStr);
         stringRedisTemplate.opsForValue().set(hashKey, countStr, 3600, TimeUnit.SECONDS);
     }
 

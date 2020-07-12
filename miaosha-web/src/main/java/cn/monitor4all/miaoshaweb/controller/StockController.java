@@ -48,12 +48,7 @@ public class StockController {
     public String getStockByCache(@PathVariable int sid) {
         Integer count;
         try {
-            count = stockService.getStockCountByCache(sid);
-            if (count == null) {
-                count = stockService.getStockCountByDB(sid);
-                LOGGER.info("缓存未命中，查询数据库，并写入缓存");
-                stockService.setStockCountCache(sid, count);
-            }
+            count = stockService.getStockCount(sid);
         } catch (Exception e) {
             LOGGER.error("查询库存失败：[{}]", e.getMessage());
             return "查询库存失败";

@@ -3,6 +3,7 @@ package cn.monitor4all.miaoshaweb.controller;
 import cn.monitor4all.miaoshaservice.service.OrderService;
 import cn.monitor4all.miaoshaservice.service.StockService;
 import cn.monitor4all.miaoshaservice.service.UserService;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.util.concurrent.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -238,7 +239,7 @@ public class OrderController {
     }
 
     /**
-     * 下单接口：先更新数据库，再删缓存，删除缓存重试机制
+     * 下单接口：先更新数据库，再删缓存，删除缓存失败重试，通知消息队列
      * @param sid
      * @return
      */
@@ -255,15 +256,104 @@ public class OrderController {
             // 延时指定时间后再次删除缓存
             // cachedThreadPool.execute(new delCacheByThread(sid));
             // 假设上述再次删除缓存没成功，通知消息队列进行删除缓存
-            sendDelCache(String.valueOf(sid));
+            sendToDelCache(String.valueOf(sid));
 
         } catch (Exception e) {
             LOGGER.error("购买失败：[{}]", e.getMessage());
             return "购买失败，库存不足";
         }
         LOGGER.info("购买成功，剩余库存为: [{}]", count);
-        return String.format("购买成功，剩余库存为：%d", count);
+        return "购买成功";
     }
+
+    /**
+     * 下单接口：异步处理订单
+     * @param sid
+     * @return
+     */
+    @RequestMapping(value = "/createOrderWithMq", method = {RequestMethod.GET})
+    @ResponseBody
+    public String createOrderWithMq(@RequestParam(value = "sid") Integer sid,
+                                  @RequestParam(value = "userId") Integer userId) {
+        try {
+            // 检查缓存中商品是否还有库存
+            Integer count = stockService.getStockCount(sid);
+            if (count == 0) {
+                return "秒杀请求失败，库存不足.....";
+            }
+
+            // 有库存，则将用户id和商品id封装为消息体传给消息队列处理
+            // 注意这里的有库存和已经下单都是缓存中的结论，存在不可靠性，在消息队列中会查表再次验证
+            LOGGER.info("有库存：[{}]", count);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("sid", sid);
+            jsonObject.put("userId", userId);
+            sendToOrderQueue(jsonObject.toJSONString());
+            return "秒杀请求提交成功";
+        } catch (Exception e) {
+            LOGGER.error("下单接口：异步处理订单异常：", e);
+            return "秒杀请求失败，服务器正忙.....";
+        }
+    }
+
+    /**
+     * 下单接口：异步处理订单
+     * @param sid
+     * @return
+     */
+    @RequestMapping(value = "/createUserOrderWithMq", method = {RequestMethod.GET})
+    @ResponseBody
+    public String createUserOrderWithMq(@RequestParam(value = "sid") Integer sid,
+                                  @RequestParam(value = "userId") Integer userId) {
+        try {
+            // 检查缓存中该用户是否已经下单过
+            Boolean hasOrder = orderService.checkUserOrderInfoInCache(sid, userId);
+            if (hasOrder != null && hasOrder) {
+                LOGGER.info("该用户已经抢购过");
+                return "你已经抢购过了，不要太贪心.....";
+            }
+            // 没有下单过，检查缓存中商品是否还有库存
+            LOGGER.info("没有抢购过，检查缓存中商品是否还有库存");
+            Integer count = stockService.getStockCount(sid);
+            if (count == 0) {
+                return "秒杀请求失败，库存不足.....";
+            }
+
+            // 有库存，则将用户id和商品id封装为消息体传给消息队列处理
+            // 注意这里的有库存和已经下单都是缓存中的结论，存在不可靠性，在消息队列中会查表再次验证
+            LOGGER.info("有库存：[{}]", count);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("sid", sid);
+            jsonObject.put("userId", userId);
+            sendToOrderQueue(jsonObject.toJSONString());
+            return "秒杀请求提交成功";
+        } catch (Exception e) {
+            LOGGER.error("下单接口：异步处理订单异常：", e);
+            return "秒杀请求失败，服务器正忙.....";
+        }
+    }
+
+    /**
+     * 检查缓存中用户是否已经生成订单
+     * @param sid
+     * @return
+     */
+    @RequestMapping(value = "/checkOrderByUserIdInCache", method = {RequestMethod.GET})
+    @ResponseBody
+    public String checkOrderByUserIdInCache(@RequestParam(value = "sid") Integer sid,
+                                  @RequestParam(value = "userId") Integer userId) {
+        // 检查缓存中该用户是否已经下单过
+        try {
+            Boolean hasOrder = orderService.checkUserOrderInfoInCache(sid, userId);
+            if (hasOrder != null && hasOrder) {
+                return "恭喜您，已经抢购成功！";
+            }
+        } catch (Exception e) {
+            LOGGER.error("检查订单异常：", e);
+        }
+        return "很抱歉，你的订单尚未生成，继续排队。";
+    }
+
 
     /**
      * 缓存再删除线程
@@ -290,9 +380,18 @@ public class OrderController {
      * 向消息队列delCache发送消息
      * @param message
      */
-    private void sendDelCache(String message) {
+    private void sendToDelCache(String message) {
         LOGGER.info("这就去通知消息队列开始重试删除缓存：[{}]", message);
         this.rabbitTemplate.convertAndSend("delCache", message);
+    }
+
+    /**
+     * 向消息队列orderQueue发送消息
+     * @param message
+     */
+    private void sendToOrderQueue(String message) {
+        LOGGER.info("这就去通知消息队列开始下单：[{}]", message);
+        this.rabbitTemplate.convertAndSend("orderQueue", message);
     }
 
 }
