@@ -12,7 +12,10 @@
 
 [【秒杀系统】零基础上手秒杀系统（四）：缓存与数据库双写问题的争议](https://mp.weixin.qq.com/s?__biz=MzU1NTA0NTEwMg==&mid=2247484200&idx=1&sn=6b6c7251ee83fe8ef9201373aafcffdd&chksm=fbdb1aa9ccac93bfe26655f89056b0d25b3a536f6b11148878fe96ffdf1d8349d44659cad784&token=841068032&lang=zh_CN#rd)
 
-[【秒杀系统】番外篇 | 阿里开源MySQL中间件Canal快速入门](https://mp.weixin.qq.com/s?__biz=MzU1NTA0NTEwMg==&mid=2247484273&idx=1&sn=7fec41a40e763df094c0dd675330808a&chksm=fbdb1af0ccac93e676c2a0c6aeb1ff3edfe43b30969a7c1bbe19ccf7270acd6e41e6812caf0d&lang=zh_CN#rd)
+[【秒杀系统】零基础上手秒杀系统番外篇：阿里开源MySQL中间件Canal快速入门](https://mp.weixin.qq.com/s?__biz=MzU1NTA0NTEwMg==&mid=2247484273&idx=1&sn=7fec41a40e763df094c0dd675330808a&chksm=fbdb1af0ccac93e676c2a0c6aeb1ff3edfe43b30969a7c1bbe19ccf7270acd6e41e6812caf0d&lang=zh_CN#rd)
+
+[【秒杀系统】零基础上手秒杀系统（五）：如何优雅的实现订单异步处理](https://mp.weixin.qq.com/s?__biz=MzU1NTA0NTEwMg==&mid=2247484580&idx=1&sn=5092e7d109b0f9bb9ed604fa03ac82cb&chksm=fbdb1d25ccac94338e39a6a36fab10dc36dd6a91a4e3cb0db1559cb82448865c4510b80a41ef&token=845103815&lang=zh_CN#rd)
+
 
 ### 项目使用简介
 
