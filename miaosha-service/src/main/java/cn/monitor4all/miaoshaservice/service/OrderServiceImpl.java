@@ -51,7 +51,10 @@ public class OrderServiceImpl implements OrderService {
         //校验库存
         Stock stock = checkStock(sid);
         //乐观锁更新库存
-        saleStockOptimistic(stock);
+        boolean success = saleStockOptimistic(stock);
+        if (!success){
+            throw new RuntimeException("过期库存值，更新失败");
+        }
         //创建订单
         createOrder(stock);
         return stock.getCount() - (stock.getSale()+1);
