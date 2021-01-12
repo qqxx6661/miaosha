@@ -65,15 +65,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public int addUserCount(Integer userId) throws Exception {
         String limitKey = CacheKey.LIMIT_KEY.getKey() + "_" + userId;
-        String limitNum = stringRedisTemplate.opsForValue().get(limitKey);
-        int limit = -1;
-        if (limitNum == null) {
-            stringRedisTemplate.opsForValue().set(limitKey, "0", 3600, TimeUnit.SECONDS);
-        } else {
-            limit = Integer.parseInt(limitNum) + 1;
-            stringRedisTemplate.opsForValue().set(limitKey, String.valueOf(limit), 3600, TimeUnit.SECONDS);
-        }
-        return limit;
+        stringRedisTemplate.opsForValue().setIfAbsent(limitKey, "0", 3600, TimeUnit.SECONDS);
+        Long limit = stringRedisTemplate.opsForValue().increment(limitKey);
+        return Integer.parseInt(String.valueOf(limit));
     }
 
     @Override
