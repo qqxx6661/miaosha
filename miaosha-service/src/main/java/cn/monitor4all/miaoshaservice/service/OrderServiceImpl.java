@@ -102,7 +102,10 @@ public class OrderServiceImpl implements OrderService {
         LOGGER.info("商品信息验证成功：[{}]", stock.toString());
 
         //乐观锁更新库存
-        saleStockOptimistic(stock);
+        boolean success = saleStockOptimistic(stock);
+        if (!success){
+            throw new RuntimeException("过期库存值，更新失败");
+        }
         LOGGER.info("乐观锁更新库存成功");
 
         //创建订单
