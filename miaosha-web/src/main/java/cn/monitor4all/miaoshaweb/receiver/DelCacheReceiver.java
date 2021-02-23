@@ -8,7 +8,11 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
+/**
+ * rabbitMq接收者
+ * 为方便初学者启动项目，暂时注释掉@Component，需要使用请去除@Component的注释
+ */
+//@Component
 @RabbitListener(queues = "delCache")
 public class DelCacheReceiver {
 
