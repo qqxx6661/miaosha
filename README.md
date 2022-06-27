@@ -29,8 +29,15 @@
 
 4. 运行miaosha-web，在POSTMAN或者浏览器直接访问请求链接即可。
 
+## 申明
+
+本仓库代码遵守Apache License 2.0，文章遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。
+
+洗稿，抄袭代码者，自重！
+
 
 ## About me
 
-![个人公众号：后端技术漫谈](http://ww1.sinaimg.cn/large/8de6a3d3gy1genhmip8aqg20go0gojz5.gif)
+全网笔名：蛮三刀酱
 
+唯一技术公众号：后端技术漫谈
