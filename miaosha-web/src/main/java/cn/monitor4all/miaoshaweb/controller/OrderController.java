@@ -182,7 +182,7 @@ public class OrderController {
             // 删除库存缓存
             stockService.delStockCountCache(sid);
             // 完成扣库存下单事务
-            orderService.createPessimisticOrder(sid);
+            count = orderService.createPessimisticOrder(sid);
         } catch (Exception e) {
             LOGGER.error("购买失败：[{}]", e.getMessage());
             return "购买失败，库存不足";
@@ -202,7 +202,7 @@ public class OrderController {
         int count = 0;
         try {
             // 完成扣库存下单事务
-            orderService.createPessimisticOrder(sid);
+            count = orderService.createPessimisticOrder(sid);
             // 删除库存缓存
             stockService.delStockCountCache(sid);
         } catch (Exception e) {
